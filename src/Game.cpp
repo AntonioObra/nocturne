@@ -5,15 +5,17 @@ Game::Game() {}
 
 void Game::run() {
   while (running) {
-    std::cout << "render" << std::endl;
     render();
     handleInput();
     update();
   }
 }
 
-void Game::render() {}
+void Game::render() { dungeon.render(); }
 
-void Game::handleInput() {}
+void Game::handleInput() {
+  std::string input;
+  std::cin >> input;
+}
 
 void Game::update() {}

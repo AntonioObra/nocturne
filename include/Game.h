@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Dungeon.h"
+
 class Game {
 public:
   Game();
@@ -8,6 +10,7 @@ public:
 
 private:
   bool running = true;
+  Dungeon dungeon;
 
   void render();
   void handleInput();
