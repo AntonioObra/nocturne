@@ -4,12 +4,24 @@
 
 Dungeon::Dungeon() { loadDungeon(); };
 
-void Dungeon::render(Position playerPosition) {
+void Dungeon::render(Position playerPosition,
+                     const std::vector<Position> &demons) {
   for (std::size_t y = 0; y < positions.size(); y++) {
     for (std::size_t x = 0; x < positions[y].size(); x++) {
       if (static_cast<int>(x) == playerPosition.x &&
           static_cast<int>(y) == playerPosition.y) {
         std::cout << "\033[1;32mP\033[m";
+        continue;
+      }
+
+      const bool hasDemon =
+          std::any_of(demons.begin(), demons.end(), [x, y](Position demon) {
+            return demon.x == static_cast<int>(x) &&
+                   demon.y == static_cast<int>(y);
+          });
+
+      if (hasDemon) {
+        std::cout << "\033[1;31mE\033[m";
         continue;
       }
 
@@ -70,4 +82,20 @@ bool Dungeon::isWalkable(Position position) const {
 
   return y < positions.size() && x < positions[y].size() &&
          positions[y][x] == Tile::Floor;
+}
+
+std::vector<Position> Dungeon::getWalkablePositions() const {
+  std::vector<Position> walkable;
+
+  for (std::size_t y = 0; y < positions.size(); y++) {
+    for (std::size_t x = 0; x < positions[y].size(); x++) {
+      Position tile{static_cast<int>(x), static_cast<int>(y)};
+
+      if (isWalkable(tile)) {
+        walkable.push_back(tile);
+      }
+    }
+  }
+
+  return walkable;
 }
