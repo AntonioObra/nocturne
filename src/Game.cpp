@@ -14,10 +14,25 @@ void Game::run() {
 
 void Game::render() {
   std::cout << "\033[2J\033[H";
+
+  std::cout << R"(
+    ▓   ▓  ▓▓▓   ▓▓▓  ▓▓▓▓▓ ▓   ▓ ▓▓▓▓  ▓   ▓ ▓▓▓▓▓
+    ▓▓  ▓ ▓   ▓ ▓       ▓   ▓   ▓ ▓   ▓ ▓▓  ▓ ▓
+    ▓ ▓ ▓ ▓   ▓ ▓       ▓   ▓   ▓ ▓▓▓▓  ▓ ▓ ▓ ▓▓▓▓
+    ▓  ▓▓ ▓   ▓ ▓       ▓   ▓   ▓ ▓  ▓  ▓  ▓▓ ▓
+    ▓   ▓  ▓▓▓   ▓▓▓    ▓    ▓▓▓  ▓   ▓ ▓   ▓ ▓▓▓▓▓
+  )";
+
+  std::cout << "\n\n";
+  std::cout << "Player Health: " << player.health << std::endl;
+  std::cout << "\n\n";
+
   dungeon.render(player.getPosition());
 }
 
 void Game::handleInput() {
+  std::cout
+      << "Place your move: (WASD for walking / F for attacking / q to quit): ";
   char input;
   if (!(std::cin >> input)) {
     running = false;
