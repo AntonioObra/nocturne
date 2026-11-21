@@ -23,6 +23,6 @@ private:
   void handleInput();
   void update();
   void movePlayer(Direction direction);
-  void moveDemon();
+  void moveDemons();
   void spawnDemons(std::size_t count);
 };

@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Direction.h"
+#include <algorithm>
 #include <iostream>
 #include <random>
 
@@ -70,9 +71,13 @@ void Game::handleInput() {
 void Game::movePlayer(Direction direction) {
   const Position destination = player.getNextPosition(direction);
 
-  if (dungeon.isWalkable(destination)) {
-    player.move(direction);
+  if (!dungeon.isWalkable(destination)) {
+    std::cout << "Cannot move player there, try again..." << std::endl;
+    return handleInput();
   }
+
+  player.move(direction);
+  moveDemons();
 }
 
 void Game::update() {}
@@ -92,5 +97,56 @@ void Game::spawnDemons(std::size_t count) {
 
   for (Position pos : available) {
     demons.push_back(pos);
+  }
+}
+
+void Game::moveDemons() {
+  const Position target = player.getPosition();
+
+  static std::mt19937 rng{std::random_device{}()};
+  std::bernoulli_distribution takesStep{0.5};
+
+  for (Demon &demon : demons) {
+    if (!takesStep(rng)) {
+      continue;
+    }
+
+    const Position current = demon.getPosition();
+
+    auto tryStep = [&](Direction direction, Position next) {
+      if ((next.x == target.x && next.y == target.y) ||
+          !dungeon.isWalkable(next)) {
+        return false;
+      }
+
+      const bool occupied =
+          std::any_of(demons.begin(), demons.end(), [next](const Demon &other) {
+            const Position position = other.getPosition();
+            return position.x == next.x && position.y == next.y;
+          });
+
+      if (occupied) {
+        return false;
+      }
+
+      demon.move(direction);
+      return true;
+    };
+
+    // Try moving horizontally toward the player first.
+    if (current.x != target.x) {
+      const bool moveRight = target.x > current.x;
+      if (tryStep(moveRight ? Direction::Right : Direction::Left,
+                  {current.x + (moveRight ? 1 : -1), current.y})) {
+        continue;
+      }
+    }
+
+    // Try vertically if the horizontal step was blocked or unnecessary.
+    if (current.y != target.y) {
+      const bool moveDown = target.y > current.y;
+      tryStep(moveDown ? Direction::Down : Direction::Up,
+              {current.x, current.y + (moveDown ? 1 : -1)});
+    }
   }
 }
