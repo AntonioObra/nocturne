@@ -4,9 +4,15 @@
 
 Dungeon::Dungeon() { loadDungeon(); };
 
-void Dungeon::render() {
+void Dungeon::render(Position playerPosition) {
   for (std::size_t y = 0; y < positions.size(); y++) {
     for (std::size_t x = 0; x < positions[y].size(); x++) {
+      if (static_cast<int>(x) == playerPosition.x &&
+          static_cast<int>(y) == playerPosition.y) {
+        std::cout << "\033[1;32mP\033[m";
+        continue;
+      }
+
       Tile tile = positions[y][x];
 
       switch (tile) {
@@ -18,12 +24,6 @@ void Dungeon::render() {
         break;
       case Tile::Door:
         std::cout << "\033[1;33m>\033[m";
-        break;
-      case Tile::Demon:
-        std::cout << "\033[1;31mE\033[m";
-        break;
-      case Tile::Player:
-        std::cout << "\033[1;32mP\033[m";
         break;
       }
     }
@@ -53,15 +53,21 @@ void Dungeon::loadDungeon() {
       case '>':
         tiles.push_back(Tile::Door);
         break;
-      case 'E':
-        tiles.push_back(Tile::Demon);
-        break;
-      case 'P':
-        tiles.push_back(Tile::Player);
-        break;
       }
     }
 
     Dungeon::positions.push_back(tiles);
   }
+}
+
+bool Dungeon::isWalkable(Position position) const {
+  if (position.x < 0 || position.y < 0) {
+    return false;
+  }
+
+  const auto y = static_cast<std::size_t>(position.y);
+  const auto x = static_cast<std::size_t>(position.x);
+
+  return y < positions.size() && x < positions[y].size() &&
+         positions[y][x] == Tile::Floor;
 }
