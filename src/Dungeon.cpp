@@ -8,15 +8,18 @@ Dungeon::Dungeon() { loadDungeon(); };
 
 // Public
 void Dungeon::render(Position playerPosition,
-                     const std::vector<Position> &demons) {
+                     const std::vector<Position> &demons,
+                     const std::vector<Position> &ghosts) {
   for (std::size_t y = 0; y < positions.size(); y++) {
     for (std::size_t x = 0; x < positions[y].size(); x++) {
+      // Player
       if (static_cast<int>(x) == playerPosition.x &&
           static_cast<int>(y) == playerPosition.y) {
         std::cout << "🧙";
         continue;
       }
 
+      // Demons
       const bool hasDemon =
           std::any_of(demons.begin(), demons.end(), [x, y](Position demon) {
             return demon.x == static_cast<int>(x) &&
@@ -28,8 +31,23 @@ void Dungeon::render(Position playerPosition,
         continue;
       }
 
+      // Ghosts
+      const bool hasGhost =
+          std::any_of(ghosts.begin(), ghosts.end(), [x, y](Position ghost) {
+            return ghost.x == static_cast<int>(x) &&
+                   ghost.y == static_cast<int>(y);
+          });
+
+      if (hasGhost) {
+        std::cout << "👻";
+        continue;
+      }
+
+      // Normal tiles
       Tile tile = positions[y][x];
 
+      // ? Add space and double ## instead of # because emojies take 2 spaces
+      // instead of 1
       switch (tile) {
       case Tile::Wall:
         std::cout << "\033[1;34m##\033[m";

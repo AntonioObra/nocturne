@@ -5,7 +5,10 @@
 #include <random>
 
 // Constructor
-Game::Game() { spawnDemons(5); }
+Game::Game() {
+  spawnDemons(2);
+  spawnGhosts(5);
+}
 
 // Public
 void Game::run() {
@@ -35,12 +38,17 @@ void Game::render() {
   std::cout << "\nPlayer Health: " << player.health << "\n\n";
 
   std::vector<Position> demonPositions;
+  std::vector<Position> ghostPositions;
 
   for (unsigned int i = 0; i < demons.size(); i++) {
     demonPositions.push_back(demons[i].position);
   }
 
-  dungeon.render(player.getPosition(), demonPositions);
+  for (unsigned int i = 0; i < ghosts.size(); i++) {
+    ghostPositions.push_back(ghosts[i].position);
+  }
+
+  dungeon.render(player.getPosition(), demonPositions, ghostPositions);
 }
 
 void Game::handleInput() {
@@ -81,6 +89,7 @@ void Game::movePlayer(Direction direction) {
 
   player.move(direction);
   moveDemons();
+  moveGhosts();
 }
 
 void Game::update() {}
@@ -149,6 +158,17 @@ void Game::moveDemons() {
         return false;
       }
 
+      // Check if position ocupied by a ghost
+      const bool positionOccupiedByGhost = std::any_of(
+          ghosts.begin(), ghosts.end(), [nextPosition](const Ghost &ghost) {
+            const Position position = ghost.getPosition();
+            return position.x == nextPosition.x && position.y == nextPosition.y;
+          });
+
+      if (positionOccupiedByGhost) {
+        return false;
+      }
+
       // * Move demon, the new position is free
       demon.move(direction);
       return true;
@@ -170,6 +190,91 @@ void Game::moveDemons() {
       tryStep(moveDown ? Direction::Down : Direction::Up,
               {currentDemonPosition.x,
                currentDemonPosition.y + (moveDown ? 1 : -1)});
+    }
+  }
+}
+
+void Game::spawnGhosts(std::size_t count) {
+  auto available = dungeon.getWalkablePositions();
+  const Position start = player.getPosition();
+
+  std::erase_if(available, [start](Position tile) {
+    return tile.x == start.x && tile.y == start.y;
+  });
+
+  std::mt19937 random{std::random_device{}()};
+  std::shuffle(available.begin(), available.end(), random);
+
+  available.resize(std::min(count, available.size()));
+
+  for (Position pos : available) {
+    ghosts.push_back(Ghost{pos});
+  }
+}
+
+void Game::moveGhosts() {
+  const Position playerPosition = player.getPosition();
+
+  for (Ghost &ghost : ghosts) {
+
+    const Position currentGhostPosition = ghost.getPosition();
+
+    // Check the new direction and position and move the ghost if its allowed
+    // direction = new direction
+    // nextPosition = new possible position of demon
+    auto tryStep = [&](Direction direction, Position nextPosition) {
+      // If the new position of current Ghost is the players current Position
+      // dont walk on it
+      // TODO: attack player instead
+      if (nextPosition.x == playerPosition.x &&
+          nextPosition.y == playerPosition.y) {
+        return false;
+      }
+
+      // * Check if any of the demons are on the new position of the
+      // current ghost
+      const bool positionOccupiedByDemon = std::any_of(
+          demons.begin(), demons.end(), [nextPosition](const Demon &other) {
+            const Position position = other.getPosition();
+            return position.x == nextPosition.x && position.y == nextPosition.y;
+          });
+
+      if (positionOccupiedByDemon) {
+        return false;
+      }
+
+      // Check if position ocupied by a ghost
+      const bool positionOccupiedByGhost = std::any_of(
+          ghosts.begin(), ghosts.end(), [nextPosition](const Ghost &ghost) {
+            const Position position = ghost.getPosition();
+            return position.x == nextPosition.x && position.y == nextPosition.y;
+          });
+
+      if (positionOccupiedByGhost) {
+        return false;
+      }
+
+      // * Move demon, the new position is free
+      ghost.move(direction);
+      return true;
+    };
+
+    // Try moving horizontally toward the player first.
+    if (currentGhostPosition.x != playerPosition.x) {
+      const bool moveRight = playerPosition.x > currentGhostPosition.x;
+      if (tryStep(moveRight ? Direction::Right : Direction::Left,
+                  {currentGhostPosition.x + (moveRight ? 1 : -1),
+                   currentGhostPosition.y})) {
+        continue;
+      }
+    }
+
+    // Try vertically if the horizontal step was blocked or unnecessary.
+    if (currentGhostPosition.y != playerPosition.y) {
+      const bool moveDown = playerPosition.y > currentGhostPosition.y;
+      tryStep(moveDown ? Direction::Down : Direction::Up,
+              {currentGhostPosition.x,
+               currentGhostPosition.y + (moveDown ? 1 : -1)});
     }
   }
 }

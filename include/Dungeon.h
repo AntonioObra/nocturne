@@ -8,7 +8,8 @@ class Dungeon {
 public:
   Dungeon();
 
-  void render(Position playerPosition, const std::vector<Position> &demons);
+  void render(Position playerPosition, const std::vector<Position> &demons,
+              const std::vector<Position> &ghosts);
   bool isWalkable(Position position) const;
   std::vector<Position> getWalkablePositions() const;
 
