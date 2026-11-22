@@ -1,7 +1,9 @@
 #include "Demon.h"
 
-Demon demon();
+// Constructor
+Demon::Demon(Position spawnPosition) { position = spawnPosition; }
 
+// Public
 void Demon::attack() {};
 
 Position Demon::getPosition() const { return position; };

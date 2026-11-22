@@ -4,8 +4,10 @@
 #include <iostream>
 #include <random>
 
+// Constructor
 Game::Game() { spawnDemons(5); }
 
+// Public
 void Game::run() {
   while (running) {
     render();
@@ -14,6 +16,7 @@ void Game::run() {
   }
 }
 
+// Private
 void Game::render() {
   std::cout << "\033[2J\033[H";
 
@@ -96,7 +99,7 @@ void Game::spawnDemons(std::size_t count) {
   available.resize(std::min(count, available.size()));
 
   for (Position pos : available) {
-    demons.push_back(pos);
+    demons.push_back(Demon{pos});
   }
 }
 

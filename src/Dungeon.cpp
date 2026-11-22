@@ -1,9 +1,12 @@
 #include "Dungeon.h"
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 
+// Constructor
 Dungeon::Dungeon() { loadDungeon(); };
 
+// Public
 void Dungeon::render(Position playerPosition,
                      const std::vector<Position> &demons) {
   for (std::size_t y = 0; y < positions.size(); y++) {
@@ -46,32 +49,6 @@ void Dungeon::render(Position playerPosition,
   std::cout << "\n";
 }
 
-void Dungeon::loadDungeon() {
-  std::ifstream file("assets/maps/dungeon_01.txt");
-  std::string str;
-
-  while (std::getline(file, str)) {
-    std::vector<char> letters(str.begin(), str.end());
-
-    std::vector<Tile> tiles;
-    for (char letter : letters) {
-      switch (letter) {
-      case '#':
-        tiles.push_back(Tile::Wall);
-        break;
-      case '.':
-        tiles.push_back(Tile::Floor);
-        break;
-      case '>':
-        tiles.push_back(Tile::Door);
-        break;
-      }
-    }
-
-    Dungeon::positions.push_back(tiles);
-  }
-}
-
 bool Dungeon::isWalkable(Position position) const {
   if (position.x < 0 || position.y < 0) {
     return false;
@@ -98,4 +75,31 @@ std::vector<Position> Dungeon::getWalkablePositions() const {
   }
 
   return walkable;
+}
+
+// Private
+void Dungeon::loadDungeon() {
+  std::ifstream file("assets/maps/dungeon_01.txt");
+  std::string str;
+
+  while (std::getline(file, str)) {
+    std::vector<char> letters(str.begin(), str.end());
+
+    std::vector<Tile> tiles;
+    for (char letter : letters) {
+      switch (letter) {
+      case '#':
+        tiles.push_back(Tile::Wall);
+        break;
+      case '.':
+        tiles.push_back(Tile::Floor);
+        break;
+      case '>':
+        tiles.push_back(Tile::Door);
+        break;
+      }
+    }
+
+    Dungeon::positions.push_back(tiles);
+  }
 }

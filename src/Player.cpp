@@ -1,5 +1,6 @@
 #include "Player.h"
 
+// Public
 void Player::attack() {};
 
 Position Player::getPosition() const { return position; };
