@@ -13,7 +13,7 @@ void Dungeon::render(Position playerPosition,
     for (std::size_t x = 0; x < positions[y].size(); x++) {
       if (static_cast<int>(x) == playerPosition.x &&
           static_cast<int>(y) == playerPosition.y) {
-        std::cout << "\033[1;32mP\033[m";
+        std::cout << "🧙";
         continue;
       }
 
@@ -24,7 +24,7 @@ void Dungeon::render(Position playerPosition,
           });
 
       if (hasDemon) {
-        std::cout << "\033[1;31mE\033[m";
+        std::cout << "👹";
         continue;
       }
 
@@ -32,13 +32,13 @@ void Dungeon::render(Position playerPosition,
 
       switch (tile) {
       case Tile::Wall:
-        std::cout << "\033[1;34m#\033[m";
+        std::cout << "\033[1;34m##\033[m";
         break;
       case Tile::Floor:
-        std::cout << "\033[1;37m.\033[m";
+        std::cout << "\033[1;37m. \033[m";
         break;
       case Tile::Door:
-        std::cout << "\033[1;33m>\033[m";
+        std::cout << "\033[1;33m> \033[m";
         break;
       }
     }
