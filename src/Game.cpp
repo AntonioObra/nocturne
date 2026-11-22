@@ -104,7 +104,7 @@ void Game::spawnDemons(std::size_t count) {
 }
 
 void Game::moveDemons() {
-  const Position target = player.getPosition();
+  const Position playerPosition = player.getPosition();
 
   static std::mt19937 rng{std::random_device{}()};
   std::bernoulli_distribution takesStep{0.5};
@@ -114,42 +114,62 @@ void Game::moveDemons() {
       continue;
     }
 
-    const Position current = demon.getPosition();
+    const Position currentDemonPosition = demon.getPosition();
 
-    auto tryStep = [&](Direction direction, Position next) {
-      if ((next.x == target.x && next.y == target.y) ||
-          !dungeon.isWalkable(next)) {
+    // Lambda
+    // TO KNOW: a small function you define right where you need it
+    //
+    // Check the new direction and position and move the demon if its allowed
+    // [&] part lets it use surrounding local variables like demon and
+    // playerPosition by reference
+    // direction = new direction
+    // nextPosition = new possible position of demon
+    auto tryStep = [&](Direction direction, Position nextPosition) {
+      // If the new position of current Demon is the players current Position
+      // dont walk on it
+      // TODO: attack player instead
+      if ((nextPosition.x == playerPosition.x &&
+           nextPosition.y == playerPosition.y) ||
+          !dungeon.isWalkable(nextPosition)) {
         return false;
       }
 
-      const bool occupied =
-          std::any_of(demons.begin(), demons.end(), [next](const Demon &other) {
+      // * Check if any of the other demons are on the new position of the
+      // current demon
+      // ? Here we are once again using lambda function and just
+      // passing it nextPosition to use const Demon &other means the current
+      // demon in a loop
+      const bool positionOccupiedByOtherDemon = std::any_of(
+          demons.begin(), demons.end(), [nextPosition](const Demon &other) {
             const Position position = other.getPosition();
-            return position.x == next.x && position.y == next.y;
+            return position.x == nextPosition.x && position.y == nextPosition.y;
           });
 
-      if (occupied) {
+      if (positionOccupiedByOtherDemon) {
         return false;
       }
 
+      // * Move demon, the new position is free
       demon.move(direction);
       return true;
     };
 
     // Try moving horizontally toward the player first.
-    if (current.x != target.x) {
-      const bool moveRight = target.x > current.x;
+    if (currentDemonPosition.x != playerPosition.x) {
+      const bool moveRight = playerPosition.x > currentDemonPosition.x;
       if (tryStep(moveRight ? Direction::Right : Direction::Left,
-                  {current.x + (moveRight ? 1 : -1), current.y})) {
+                  {currentDemonPosition.x + (moveRight ? 1 : -1),
+                   currentDemonPosition.y})) {
         continue;
       }
     }
 
     // Try vertically if the horizontal step was blocked or unnecessary.
-    if (current.y != target.y) {
-      const bool moveDown = target.y > current.y;
+    if (currentDemonPosition.y != playerPosition.y) {
+      const bool moveDown = playerPosition.y > currentDemonPosition.y;
       tryStep(moveDown ? Direction::Down : Direction::Up,
-              {current.x, current.y + (moveDown ? 1 : -1)});
+              {currentDemonPosition.x,
+               currentDemonPosition.y + (moveDown ? 1 : -1)});
     }
   }
 }
