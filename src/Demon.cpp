@@ -4,8 +4,6 @@
 Demon::Demon(Position spawnPosition) { position = spawnPosition; }
 
 // Public
-void Demon::attack() {};
-
 Position Demon::getPosition() const { return position; };
 
 Position Demon::getNextPosition(Direction direction) const {

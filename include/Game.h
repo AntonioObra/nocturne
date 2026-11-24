@@ -27,6 +27,7 @@ private:
 
   // Player
   void movePlayer(Direction direction);
+  void attackPlayer(int damage);
 
   // Demons
   void spawnDemons(std::size_t count);

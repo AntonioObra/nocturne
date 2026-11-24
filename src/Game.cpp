@@ -7,7 +7,7 @@
 // Constructor
 Game::Game() {
   spawnDemons(2);
-  spawnGhosts(5);
+  spawnGhosts(1);
 }
 
 // Public
@@ -228,6 +228,7 @@ void Game::moveGhosts() {
       // TODO: attack player instead
       if (nextPosition.x == playerPosition.x &&
           nextPosition.y == playerPosition.y) {
+        attackPlayer(ghost.damage);
         return false;
       }
 
@@ -277,4 +278,10 @@ void Game::moveGhosts() {
                currentGhostPosition.y + (moveDown ? 1 : -1)});
     }
   }
+}
+
+void Game::attackPlayer(int damage) {
+  player.health -= damage;
+  std::cout << "You have been attacked. You lost " << damage << " hp"
+            << std::endl;
 }
